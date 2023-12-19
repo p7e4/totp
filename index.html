@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>totp</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/favicon.png">
+    <link rel="stylesheet" href="bolt.min.css">
+  </head>
+
+  <body>
+    <div style="display: grid; place-items: center; margin-top: 15vh;">
+      <label for="secret"> secret </label>
+      <input id="secret" type="text" oninput="inputSecret(event);" />
+      <br />
+      <samp id="code">000000</samp>
+      <br />
+      <progress id="time" max="30" value="0" />
+    </div>
+  </body>
+  <script src="otpauth.umd.min.js"></script>
+  <script>
+    var code = document.getElementById("code");
+    var totp;
+    var intervId;
+    function inputSecret(event) {
+      clearInterval(intervId);
+      totp = new OTPAuth.TOTP({
+        // issuer: "ACME",
+        // label: "AzureDiamond",
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+        secret: event.target.value
+      });
+      refreshCode()
+      // totp = OTPAuth.URI.parse(uri);
+      intervId = setInterval(() => {
+        var ttl = Math.floor(Date.now() / 1000 % 30);
+        time.value = ttl
+        if (ttl === 0) {
+          refreshCode();
+        }
+      }, 1000);
+    }
+    function refreshCode() {
+      code.innerText = totp.generate()
+    }
+  </script>
+</html>
+
